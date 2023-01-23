@@ -6,11 +6,15 @@ import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.util.Scanner;
 
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
+import javax.swing.border.EmptyBorder;
 import javax.swing.JButton;
 import javax.swing.ImageIcon;
 
@@ -28,10 +32,14 @@ public class Main extends JFrame implements ActionListener {
 	JTextField detailsTextField;
 	JTextField subtotalTextField;
 	
+	Item[] orderArr = new Item[30];
+	int itemCount = 0;
+	double subTotal = 0.0;
+	
 	Main() {
 		
 		this.setTitle("Nile Dot Com"); // sets title
-		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE); // exit out of application
+		this.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE); // exit out of application
 		//frame.setResizable(false); //prevent frame from being resized
 		this.setLayout(null);
 		this.setSize(750, 500); // sets x and y dimension of frame
@@ -42,6 +50,7 @@ public class Main extends JFrame implements ActionListener {
 		JPanel northPanel = new JPanel();
 		northPanel.setBackground(Color.DARK_GRAY);
 		northPanel.setBounds(0,0,750,300);
+		northPanel.setBorder(new EmptyBorder(50, 0, 0, 0));
 	
 		
 		// label panel
@@ -90,10 +99,12 @@ public class Main extends JFrame implements ActionListener {
 		
 		detailsTextField = new JTextField();
 		detailsTextField.setPreferredSize(new Dimension(300,20));
+		detailsTextField.setEditable(false);
 		textfieldPanel.add(detailsTextField);
 		
 		subtotalTextField = new JTextField();
 		subtotalTextField.setPreferredSize(new Dimension(300,20));
+		subtotalTextField.setEditable(false);
 		textfieldPanel.add(subtotalTextField);
 		northPanel.add(textfieldPanel);
 		
@@ -118,6 +129,7 @@ public class Main extends JFrame implements ActionListener {
 		purchaseItemButton.setFont(new Font("Verdana",Font.PLAIN, 14));
 		purchaseItemButton.addActionListener(this);
 		purchaseItemButton.setPreferredSize(new Dimension(350,25));
+		purchaseItemButton.setEnabled(false);
 		southPanel.add(purchaseItemButton);
 		
 		viewOrderButton = new JButton();
@@ -127,6 +139,7 @@ public class Main extends JFrame implements ActionListener {
 		viewOrderButton.setFont(new Font("Verdana",Font.PLAIN, 14));
 		viewOrderButton.addActionListener(this);
 		viewOrderButton.setPreferredSize(new Dimension(350,25));
+		viewOrderButton.setEnabled(false);
 		southPanel.add(viewOrderButton);
 		
 		completeOrderButton = new JButton();
@@ -136,6 +149,7 @@ public class Main extends JFrame implements ActionListener {
 		completeOrderButton.setFont(new Font("Verdana",Font.PLAIN, 14));
 		completeOrderButton.addActionListener(this);
 		completeOrderButton.setPreferredSize(new Dimension(350,25));
+		completeOrderButton.setEnabled(false);
 		southPanel.add(completeOrderButton);
 		
 		newOrderButton = new JButton();
@@ -168,6 +182,44 @@ public class Main extends JFrame implements ActionListener {
 	@Override 
 	public void actionPerformed(ActionEvent e) {
 		if(e.getSource() == findItemButton) {
+			String item = idTextField.getText();
+			File file = new File("inventory.txt");
+			Scanner scanner;
+			try {
+				scanner = new Scanner(file);
+				while (scanner.hasNextLine()) {
+					   final String lineFromFile = scanner.nextLine();
+					   if(lineFromFile.contains(item)) { 
+					       // a match!
+						   System.out.println(lineFromFile);
+						   String[] itemFields = lineFromFile.split(",");
+							   int quantity = Integer.parseInt(quantityTextField.getText());
+							   double discount = 0.0;
+							   if(quantity >= 5 && quantity <= 9) {
+								   discount = 0.1;
+							   } else if(quantity >= 10 && quantity <= 14) {
+								   discount = 0.15;
+							   } else if(quantity >= 15) {
+								   discount = 0.2;
+							   }
+							   orderArr[itemCount] = new Item(itemFields[0],itemFields[1],itemFields[2],itemFields[3], discount, quantity);
+							   System.out.println(orderArr[0].id);
+							   double total = Double.parseDouble(orderArr[itemCount].cost) * quantity;
+							   if (discount > 0.0) {
+								   total -= (total * discount);
+							   } 
+							   System.out.println(total);
+	//					       System.out.println("I found " +item+ " in file " +file.getName());
+							   detailsTextField.setText(orderArr[itemCount].id  + orderArr[itemCount].title + " $" + orderArr[itemCount].cost + " " + orderArr[itemCount].quantity + " %" + orderArr[itemCount].discount + " " + total);
+							   subTotal += total;
+							   subtotalTextField.setText("$" + subTotal);
+					       break;
+					   }
+					}
+			} catch (FileNotFoundException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
 			System.out.println("Find Item Button clicked!");
 		} else if (e.getSource() == purchaseItemButton) {
 			System.out.println("Purchase Item Button clicked!");
@@ -179,6 +231,7 @@ public class Main extends JFrame implements ActionListener {
 			System.out.println("New Order Button clicked!");
 		} else if (e.getSource() == exitButton) {
 			System.out.println("Exit Button clicked!");
+			this.dispose();
 		}
 	}
 }

@@ -12,6 +12,7 @@ import java.util.Scanner;
 
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.border.EmptyBorder;
@@ -35,6 +36,8 @@ public class Main extends JFrame implements ActionListener {
 	Item[] orderArr = new Item[30];
 	int itemCount = 0;
 	double subTotal = 0.0;
+	boolean found = false;
+	boolean inStock = false;
 	
 	Main() {
 		
@@ -189,36 +192,54 @@ public class Main extends JFrame implements ActionListener {
 				scanner = new Scanner(file);
 				while (scanner.hasNextLine()) {
 					   final String lineFromFile = scanner.nextLine();
+					   //contain only checks for the existence of the substring
 					   if(lineFromFile.contains(item)) { 
 					       // a match!
 						   System.out.println(lineFromFile);
 						   String[] itemFields = lineFromFile.split(",");
-							   int quantity = Integer.parseInt(quantityTextField.getText());
-							   double discount = 0.0;
-							   if(quantity >= 5 && quantity <= 9) {
-								   discount = 0.1;
-							   } else if(quantity >= 10 && quantity <= 14) {
-								   discount = 0.15;
-							   } else if(quantity >= 15) {
-								   discount = 0.2;
+						   // here we ensure the id inputed by the user
+						   if(itemFields[0].equals(idTextField.getText())) {
+							   found = true;
+							   if(itemFields[2].strip().equals( "true")) {
+								   inStock = true;
+								   int quantity = Integer.parseInt(quantityTextField.getText());
+								   double discount = 0.0;
+								   if(quantity >= 5 && quantity <= 9) {
+									   discount = 0.1;
+								   } else if(quantity >= 10 && quantity <= 14) {
+									   discount = 0.15;
+								   } else if(quantity >= 15) {
+									   discount = 0.2;
+								   }
+								   orderArr[itemCount] = new Item(itemFields[0],itemFields[1],itemFields[2],itemFields[3], discount, quantity);
+								   double total = Double.parseDouble(orderArr[itemCount].cost) * quantity;
+								   if (discount > 0.0) {
+									   total -= (total * discount);
+								   } 
+	//							   System.out.println(total);
+		//					       System.out.println("I found " +item+ " in file " +file.getName());
+								   detailsTextField.setText(orderArr[itemCount].id  + orderArr[itemCount].title + " $" + orderArr[itemCount].cost + " " + orderArr[itemCount].quantity + " %" + orderArr[itemCount].discount + " " + total);
+								   subTotal += total;
+								   subtotalTextField.setText("$" + subTotal);
+						       break;
 							   }
-							   orderArr[itemCount] = new Item(itemFields[0],itemFields[1],itemFields[2],itemFields[3], discount, quantity);
-							   System.out.println(orderArr[0].id);
-							   double total = Double.parseDouble(orderArr[itemCount].cost) * quantity;
-							   if (discount > 0.0) {
-								   total -= (total * discount);
-							   } 
-							   System.out.println(total);
-	//					       System.out.println("I found " +item+ " in file " +file.getName());
-							   detailsTextField.setText(orderArr[itemCount].id  + orderArr[itemCount].title + " $" + orderArr[itemCount].cost + " " + orderArr[itemCount].quantity + " %" + orderArr[itemCount].discount + " " + total);
-							   subTotal += total;
-							   subtotalTextField.setText("$" + subTotal);
-					       break;
+						   }
 					   }
 					}
 			} catch (FileNotFoundException e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
+			}
+			if(found == false) {
+				JOptionPane.showMessageDialog(this,
+					    "Item ID " + idTextField.getText() + " not in file",
+					    "Nile Dot Com - ERROR",
+					    JOptionPane.ERROR_MESSAGE);
+			} else if(inStock == false) {
+				JOptionPane.showMessageDialog(this,
+					    "Sorry.. that item is not in stock. Please try another item.",
+					    "Nile Dot Com - ERROR",
+					    JOptionPane.ERROR_MESSAGE);
 			}
 			System.out.println("Find Item Button clicked!");
 		} else if (e.getSource() == purchaseItemButton) {

@@ -21,6 +21,11 @@ import javax.swing.ImageIcon;
 
 public class Main extends JFrame implements ActionListener {
 	
+	JLabel idLabel;
+	JLabel quantityLabel;
+	JLabel detailsLabel;
+	JLabel subtotalLabel;
+	
 	JButton findItemButton;
 	JButton purchaseItemButton;
 	JButton viewOrderButton;
@@ -34,8 +39,10 @@ public class Main extends JFrame implements ActionListener {
 	JTextField subtotalTextField;
 	
 	Item[] orderArr = new Item[30];
-	int itemCount = 0;
+	int orderCount = 0;
+	int itemCount = 1;
 	double subTotal = 0.0;
+	double tempSubTotal = 0.0;
 	boolean found = false;
 	boolean inStock = false;
 	
@@ -62,23 +69,23 @@ public class Main extends JFrame implements ActionListener {
 		labelPanel.setPreferredSize(new Dimension(250,150));
 		
 		// label panel labels
-		JLabel idLabel = new JLabel();
-		idLabel.setText("Enter item ID for Item #1:");
+		idLabel = new JLabel();
+		idLabel.setText("Enter item ID for Item #" + itemCount + ":");
 		idLabel.setForeground(Color.yellow);
 		idLabel.setFont(new Font("Verdana",Font.PLAIN, 14));
 		labelPanel.add(idLabel);
-		JLabel quantityLabel = new JLabel();
-		quantityLabel.setText("Enter quantity item for Item #1:");
+		quantityLabel = new JLabel();
+		quantityLabel.setText("Enter quantity item for Item #" + itemCount + ":");
 		quantityLabel.setForeground(Color.yellow);
 		quantityLabel.setFont(new Font("Verdana",Font.PLAIN, 14));
 		labelPanel.add(quantityLabel);
-		JLabel detailsLabel = new JLabel();
-		detailsLabel.setText("Details for Item #1:");
+		detailsLabel = new JLabel();
+		detailsLabel.setText("Details for Item #" + itemCount + ":");
 		detailsLabel.setForeground(Color.yellow);
 		detailsLabel.setFont(new Font("Verdana",Font.PLAIN, 14));
 		labelPanel.add(detailsLabel);
-		JLabel subtotalLabel = new JLabel();
-		subtotalLabel.setText("Order subtotal for 0 item(s):");
+		subtotalLabel = new JLabel();
+		subtotalLabel.setText("Order subtotal for " + orderCount + " item(s):");
 		subtotalLabel.setForeground(Color.yellow);
 		subtotalLabel.setFont(new Font("Verdana",Font.PLAIN, 14));
 		labelPanel.add(subtotalLabel);
@@ -89,24 +96,24 @@ public class Main extends JFrame implements ActionListener {
 		// text field panel labels
 		JPanel textfieldPanel = new JPanel(new FlowLayout(FlowLayout.LEADING, 0, 15));
 		textfieldPanel.setBackground(Color.DARK_GRAY);
-		textfieldPanel.setPreferredSize(new Dimension(300,150));
+		textfieldPanel.setPreferredSize(new Dimension(350,150));
 		
 		//text fields
 		idTextField = new JTextField();
-		idTextField.setPreferredSize(new Dimension(300,20));
+		idTextField.setPreferredSize(new Dimension(350,20));
 		textfieldPanel.add(idTextField);
 		
 		quantityTextField = new JTextField();
-		quantityTextField.setPreferredSize(new Dimension(300,20));
+		quantityTextField.setPreferredSize(new Dimension(350,20));
 		textfieldPanel.add(quantityTextField);
 		
 		detailsTextField = new JTextField();
-		detailsTextField.setPreferredSize(new Dimension(300,20));
+		detailsTextField.setPreferredSize(new Dimension(350,20));
 		detailsTextField.setEditable(false);
 		textfieldPanel.add(detailsTextField);
 		
 		subtotalTextField = new JTextField();
-		subtotalTextField.setPreferredSize(new Dimension(300,20));
+		subtotalTextField.setPreferredSize(new Dimension(350,20));
 		subtotalTextField.setEditable(false);
 		textfieldPanel.add(subtotalTextField);
 		northPanel.add(textfieldPanel);
@@ -117,7 +124,7 @@ public class Main extends JFrame implements ActionListener {
 		
 		// south panel buttons
 		findItemButton = new JButton();
-		findItemButton.setText("Find Item #1");
+		findItemButton.setText("Find Item #" + itemCount);
 		findItemButton.setFocusable(false);
 		findItemButton.setBackground(Color.white);
 		findItemButton.setFont(new Font("Verdana",Font.PLAIN, 14));
@@ -126,7 +133,7 @@ public class Main extends JFrame implements ActionListener {
 		southPanel.add(findItemButton);
 		
 		purchaseItemButton = new JButton();
-		purchaseItemButton.setText("Purchase Item #1");
+		purchaseItemButton.setText("Purchase Item #" + itemCount);
 		purchaseItemButton.setFocusable(false);
 		purchaseItemButton.setBackground(Color.white);
 		purchaseItemButton.setFont(new Font("Verdana",Font.PLAIN, 14));
@@ -211,16 +218,23 @@ public class Main extends JFrame implements ActionListener {
 								   } else if(quantity >= 15) {
 									   discount = 0.2;
 								   }
-								   orderArr[itemCount] = new Item(itemFields[0],itemFields[1],itemFields[2],itemFields[3], discount, quantity);
-								   double total = Double.parseDouble(orderArr[itemCount].cost) * quantity;
+								   String cost = itemFields[3];
+								   double total = Double.parseDouble(cost) * quantity;
 								   if (discount > 0.0) {
 									   total -= (total * discount);
 								   } 
-	//							   System.out.println(total);
-		//					       System.out.println("I found " +item+ " in file " +file.getName());
-								   detailsTextField.setText(orderArr[itemCount].id  + orderArr[itemCount].title + " $" + orderArr[itemCount].cost + " " + orderArr[itemCount].quantity + " %" + orderArr[itemCount].discount + " " + total);
-								   subTotal += total;
-								   subtotalTextField.setText("$" + subTotal);
+								   orderArr[orderCount] = new Item(itemFields[0],itemFields[1],itemFields[2],itemFields[3], discount, quantity, total);
+								   detailsTextField.setText(orderArr[orderCount].id  + orderArr[orderCount].title + " $" + orderArr[orderCount].cost + " " + orderArr[orderCount].quantity + " %" + orderArr[orderCount].discount + " " + orderArr[orderCount].total);
+								   tempSubTotal += total;
+								   if(orderCount > 0) {
+									   subtotalTextField.setText("$" + subTotal);
+								   } else {
+									   subtotalTextField.setText("$" + tempSubTotal);
+								   }
+								   
+								   findItemButton.setEnabled(false);
+								   purchaseItemButton.setEnabled(true);
+								   detailsLabel.setText("Details for Item #" + itemCount + ":");
 						       break;
 							   }
 						   }
@@ -242,13 +256,55 @@ public class Main extends JFrame implements ActionListener {
 					    JOptionPane.ERROR_MESSAGE);
 			}
 			System.out.println("Find Item Button clicked!");
+			found = false;
+			inStock = false;
 		} else if (e.getSource() == purchaseItemButton) {
 			System.out.println("Purchase Item Button clicked!");
+			orderCount += 1;
+			itemCount += 1;
+			subTotal += tempSubTotal;
+			tempSubTotal = 0.0;
+			subtotalTextField.setText("$" + subTotal);
+			findItemButton.setEnabled(true);
+			purchaseItemButton.setEnabled(false);
+			completeOrderButton.setEnabled(true);
+			viewOrderButton.setEnabled(true);
+			idTextField.setText("");
+			quantityTextField.setText("");
+			idLabel.setText("Enter item ID for Item #" + itemCount + ":");
+			quantityLabel.setText("Enter quantity item for Item #" + itemCount + ":");
+			subtotalLabel.setText("Order subtotal for " + orderCount + " item(s):");
+			purchaseItemButton.setText("Purchase Item #" + itemCount);
+			findItemButton.setText("Find Item #" + itemCount);
 		} else if (e.getSource() == viewOrderButton) {
+			System.out.println("View Order frist id: " + orderArr[0].id);
+			String orderStr = "";
+			int count = 1;
+			for(int i = 0; i < orderCount; i++){
+				orderStr = orderStr.concat(count + ". "+ orderArr[i].id  + orderArr[i].title + " $" + orderArr[i].cost + " " + orderArr[i].quantity + " %" + orderArr[i].discount + " " + orderArr[i].total + "\n");
+				count += 1;
+			}
+			JOptionPane.showMessageDialog(this, orderStr, "Nile Dot Com - Current Shopping Cart Status",JOptionPane.INFORMATION_MESSAGE);
 			System.out.println("View Order Button clicked!");
 		} else if (e.getSource() == completeOrderButton) {
 			System.out.println("Complete Order Button clicked!");
 		} else if (e.getSource() == newOrderButton) {
+			idTextField.setText("");
+			quantityTextField.setText("");
+			detailsTextField.setText("");
+			subtotalTextField.setText("");
+			orderCount = 0;
+			itemCount = 1;
+			subTotal = 0.0;
+			tempSubTotal = 0.0;
+			idLabel.setText("Enter item ID for Item #" + itemCount + ":");
+			quantityLabel.setText("Enter quantity item for Item #" + itemCount + ":");
+			subtotalLabel.setText("Order subtotal for " + orderCount + " item(s):");
+			purchaseItemButton.setText("Purchase Item #" + itemCount);
+			findItemButton.setText("Find Item #" + itemCount);
+			detailsLabel.setText("Details for Item #" + itemCount + ":");
+			completeOrderButton.setEnabled(false);
+			viewOrderButton.setEnabled(false);
 			System.out.println("New Order Button clicked!");
 		} else if (e.getSource() == exitButton) {
 			System.out.println("Exit Button clicked!");

@@ -1,6 +1,7 @@
-# NileDotCom is a Java GUI Application 
+# NileDotCom
+### Java program that creates a standalone GUI application that simulates an e-store which allows the user to add in stock items (found in text file) to a shopping cart and once all items are included, total all costs (including tax), produces an invoice, and append a transaction log file. 
 
-Here is the application of launch
+Here is the application on launch
 
 ![Nile Dot Com 1_29_2023 6_12_14 PM](https://user-images.githubusercontent.com/42612374/229373353-6e460187-7300-43bc-b2b3-f5576870a144.png)
 
